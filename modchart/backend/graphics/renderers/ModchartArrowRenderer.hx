@@ -200,7 +200,6 @@ final class ModchartArrowRenderer extends ModchartRenderer<FlxSprite> {
 	private function __drawInstruction(instruction:FMDrawInstruction) {
 		if (instruction == null)
 			return;
-
 		final item = instruction.item;
 		final cameras = item._cameras != null ? item._cameras : Adapter.instance.getArrowCamera();
 

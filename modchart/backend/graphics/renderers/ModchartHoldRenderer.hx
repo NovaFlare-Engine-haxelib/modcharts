@@ -32,6 +32,8 @@ final class ModchartHoldRenderer extends ModchartRenderer<FlxSprite> {
 		super(instance);
 
 		instance.setPercent('dizzyHolds', 1, -1);
+		instance.setPercent('longHolds', 1, -1); // 确保longHolds有初始值
+		instance.setPercent('shortHolds', 0, -1); // 确保shortHolds有初始值
 	}
 
 	inline private function __rotateTail(pos:Vector3) {
@@ -90,8 +92,12 @@ final class ModchartHoldRenderer extends ModchartRenderer<FlxSprite> {
 			unit.normalize();
 		}
 
-		var quad0 = new Vector3(-unit.y * size, unit.x * size);
-		var quad1 = new Vector3(unit.y * size, -unit.x * size);
+		// 检查是否为downscroll模式，如果是，则翻转quad的方向以修正左右翻转问题
+		var isDownscroll = Adapter.instance.getDownscroll();
+		var directionFactor = isDownscroll ? -1 : 1;
+
+		var quad0 = new Vector3(-unit.y * size * directionFactor, unit.x * size);
+		var quad1 = new Vector3(unit.y * size * directionFactor, -unit.x * size);
 
 		final visuals = origin.visuals;
 		@:privateAccess
@@ -167,7 +173,7 @@ final class ModchartHoldRenderer extends ModchartRenderer<FlxSprite> {
 		}
 	}
 
-	var __lastLong:Float = 0;
+	var __lastLong:Float = -9999; // set a wired data for default. -by狐月影(beihu235)
 	var __lastC2:Float = 0;
 	var __lastDizzy:Float = 0;
 
@@ -211,10 +217,12 @@ final class ModchartHoldRenderer extends ModchartRenderer<FlxSprite> {
 
 		var alphaTotal:Float = 0.;
 
-		final canUseLast = __lastPlayer == player;
+		var canUseLast = __lastPlayer == player;
+		if (__lastLong == -9999)
+			canUseLast = false;
 
 		// refresh global mods percents
-		__long = canUseLast ? __lastLong : (__lastLong = instance.getPercent('longHolds', player) - instance.getPercent('shortHolds', player) + 1);
+		__long = canUseLast ? __lastLong : (__lastLong = instance.getPercent('longHolds', player) - instance.getPercent('shortHolds', player));
 		__centered2 = canUseLast ? __lastC2 : (__lastC2 = instance.getPercent('centered2', player));
 		__dizzy = canUseLast ? __lastDizzy : (__lastDizzy = instance.getPercent('dizzyHolds', player));
 
@@ -304,20 +312,22 @@ final class ModchartHoldRenderer extends ModchartRenderer<FlxSprite> {
 		newInstruction.colorData = transfTotal;
 		newInstruction.extra = [alphaTotal];
 
-		queue[count++] = newInstruction;
+		queue[count] = newInstruction;
+		count++;
 
 		__lastHoldSubs = HOLD_SUBDIVISIONS;
 	}
 
-	inline static final drawMargin = 50;
+	/*
+		inline static final drawMargin = 50;
 
-	inline function shouldDraw(info:HoldSegmentOutput) {
-		return info.origin.x < -drawMargin
-			&& info.origin.x > FlxG.width + drawMargin
-			&& info.origin.y < -drawMargin
-			&& info.origin.y > FlxG.height + drawMargin;
-	}
-
+		inline function shouldDraw(info:HoldSegmentOutput) {
+			return !(info.origin.x < -drawMargin
+				|| info.origin.x > FlxG.width + drawMargin
+				|| info.origin.y < -drawMargin
+				|| info.origin.y > FlxG.height + drawMargin);
+		}
+	 */
 	override public function shift() {
 		__drawInstruction(queue[postCount++]);
 	}
