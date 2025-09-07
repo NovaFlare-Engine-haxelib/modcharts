@@ -15,6 +15,7 @@ class FMDrawInstruction {
 
 	var extra:Array<Dynamic>;
 	var mappedExtra:Map<String, Dynamic>;
+	var alreadyLoaded:Bool = false;
 
 	public function new() {}
 }

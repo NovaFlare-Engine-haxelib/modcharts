@@ -173,7 +173,7 @@ final class ModchartHoldRenderer extends ModchartRenderer<FlxSprite> {
 		}
 	}
 
-	var __lastLong:Float = -9999; // set a wired data for default. -by狐月影(beihu235)
+	var __lastLong:Float = 0;
 	var __lastC2:Float = 0;
 	var __lastDizzy:Float = 0;
 
@@ -181,7 +181,7 @@ final class ModchartHoldRenderer extends ModchartRenderer<FlxSprite> {
 	var __lastRY:Float = 0;
 	var __lastRZ:Float = 0;
 
-	var __lastPlayer:Int = 0;
+	var __lastPlayer:Int = -9999; // set a wired data for default. -by狐月影(beihu235)
 
 	override public function prepare(item:FlxSprite):Void {
 		if (item.alpha <= 0)
@@ -218,8 +218,6 @@ final class ModchartHoldRenderer extends ModchartRenderer<FlxSprite> {
 		var alphaTotal:Float = 0.;
 
 		var canUseLast = __lastPlayer == player;
-		if (__lastLong == -9999)
-			canUseLast = false;
 
 		// refresh global mods percents
 		__long = canUseLast ? __lastLong : (__lastLong = instance.getPercent('longHolds', player) - instance.getPercent('shortHolds', player));
@@ -312,29 +310,28 @@ final class ModchartHoldRenderer extends ModchartRenderer<FlxSprite> {
 		newInstruction.colorData = transfTotal;
 		newInstruction.extra = [alphaTotal];
 
-		queue[count] = newInstruction;
-		count++;
+		queue[count++] = newInstruction;
 
 		__lastHoldSubs = HOLD_SUBDIVISIONS;
 	}
 
-	/*
-		inline static final drawMargin = 50;
+	inline static final drawMargin = 50;
 
-		inline function shouldDraw(info:HoldSegmentOutput) {
-			return !(info.origin.x < -drawMargin
-				|| info.origin.x > FlxG.width + drawMargin
-				|| info.origin.y < -drawMargin
-				|| info.origin.y > FlxG.height + drawMargin);
-		}
-	 */
+	inline function shouldDraw(info:HoldSegmentOutput) {
+		return !(info.origin.x < -drawMargin
+			|| info.origin.x > FlxG.width + drawMargin
+			|| info.origin.y < -drawMargin
+			|| info.origin.y > FlxG.height + drawMargin);
+	}
+
 	override public function shift() {
 		__drawInstruction(queue[postCount++]);
 	}
 
 	private function __drawInstruction(instruction:FMDrawInstruction) {
-		if (instruction == null)
+		if (instruction == null || instruction.alreadyLoaded)
 			return;
+		instruction.alreadyLoaded = true;
 		final item:FlxSprite = instruction.item;
 
 		var cameras = item._cameras != null ? item._cameras : Adapter.instance.getArrowCamera();

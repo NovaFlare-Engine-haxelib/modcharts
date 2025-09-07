@@ -74,6 +74,10 @@ class Psych implements IAdapter {
 
 			if (castedNote.nextNote != null)
 				return !castedNote.nextNote.isSustainNote;
+			else {
+				if (castedNote.prevNote.isSustainNote)
+					return true;
+			}
 		}
 		return false;
 	}

@@ -188,9 +188,7 @@ final class ModchartArrowRenderer extends ModchartRenderer<FlxSprite> {
 		newInstruction.uvt = uvData;
 		newInstruction.indices = new Vector<Int>(vertices.length, true, [for (i in 0...vertices.length) i]);
 		newInstruction.colorData = [color];
-		queue[count] = newInstruction;
-
-		count++;
+		queue[count++] = newInstruction;
 	}
 
 	override public function shift() {
