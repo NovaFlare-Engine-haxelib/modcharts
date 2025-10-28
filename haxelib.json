@@ -1,5 +1,5 @@
 {
-    "name": "funkin-modchart",
+    "name": "modchart",
     "license": "Apache",
     "description": "An modcharting plugin for Friday Night Funkin'",
     "version": "1.2.3",
@@ -9,5 +9,5 @@
     "dependencies": {
       "flixel": ""
     },
-    "url": "https://github.com/TheoDevelops/FunkinModchart"
+    "url": "https://github.com/NovaFlare-Engine-haxelib/modcharts"
   }
