@@ -83,6 +83,8 @@ final class ModchartCamera3D {
 	@:noCompletion private var __viewMatrix(default, null):Matrix3D = new Matrix3D();
 	@:noCompletion private var __rotationMatrix(default, null):Matrix3D = new Matrix3D();
 
+	public function getViewMatrix() return __viewMatrix;
+
 	public function new() {}
 
 	/**

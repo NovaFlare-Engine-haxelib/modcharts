@@ -213,6 +213,7 @@ final class PlayField extends FlxSprite {
 	}
 
 	var drawCB:Array<{callback:Void->Void, z:Float}> = [];
+	private var _drawPool:Array<{callback:Void->Void, z:Float}> = [];
 
 	private function getVisibility(obj:flixel.FlxObject) {
 		@:bypassAccessor obj.visible = false;
@@ -220,7 +221,8 @@ final class PlayField extends FlxSprite {
 	}
 
 	private function __drawPlayField() {
-		drawCB = [];
+		while (drawCB.length > 0)
+			_drawPool.push(drawCB.pop());
 
 		// TODO: prepare arrow paths shit
 		var pathAlphaTotal = .0;
@@ -258,12 +260,11 @@ final class PlayField extends FlxSprite {
 		if (Config.RENDER_ARROW_PATHS)
 			pathRenderer.preallocate(receptorLength);
 
-		drawCB.resize(receptorLength + arrowLength + holdLength + attachmentLength);
-
-		var j = 0;
-		inline function queue(f:{callback:Void->Void, z:Float}) {
-			drawCB[j] = f;
-			j++;
+		inline function queue(callback:Void->Void, z:Float) {
+			var item = _drawPool.length > 0 ? _drawPool.pop() : {callback: null, z: 0.0};
+			item.callback = callback;
+			item.z = z;
+			drawCB.push(item);
 		}
 
 		// i is player index
@@ -279,10 +280,7 @@ final class PlayField extends FlxSprite {
 					receptorRenderer.prepare(receptor);
 					if (Config.RENDER_ARROW_PATHS)
 						pathRenderer.prepare(receptor);
-					queue({
-						callback: receptorRenderer.shift,
-						z: receptor._z
-					});
+					queue(receptorRenderer.shift, receptor._z);
 				}
 			}
 
@@ -294,10 +292,7 @@ final class PlayField extends FlxSprite {
 					}
 
 					holdRenderer.prepare(hold);
-					queue({
-						callback: holdRenderer.shift,
-						z: hold._z
-					});
+					queue(holdRenderer.shift, hold._z);
 				}
 			}
 
@@ -308,10 +303,7 @@ final class PlayField extends FlxSprite {
 						continue;
 
 					arrowRenderer.prepare(arrow);
-					queue({
-						callback: arrowRenderer.shift,
-						z: arrow._z
-					});
+					queue(arrowRenderer.shift, arrow._z);
 				}
 			}
 
@@ -322,16 +314,15 @@ final class PlayField extends FlxSprite {
 						continue;
 
 					attachmentRenderer.prepare(attachment);
-					queue({
-						callback: attachmentRenderer.shift,
-						z: attachment._z
-					});
+					queue(attachmentRenderer.shift, attachment._z);
 				}
 			}
 		}
 
-		for (r in [receptorRenderer, arrowRenderer, holdRenderer, attachmentRenderer])
-			r.sort();
+		receptorRenderer.sort();
+		arrowRenderer.sort();
+		holdRenderer.sort();
+		attachmentRenderer.sort();
 
 		if (Config.RENDER_ARROW_PATHS)
 			pathRenderer.shift();

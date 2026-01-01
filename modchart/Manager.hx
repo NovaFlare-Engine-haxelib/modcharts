@@ -66,6 +66,12 @@ final class Manager extends FlxBasic {
 			func(playfields[i]);
 	}
 
+	private static function sortFunny(a:Funny, b:Funny):Int {
+		return FlxSort.byValues(FlxSort.DESCENDING, a.z, b.z);
+	}
+
+	private var drawQueue:Array<Funny> = []; // Reuse array to avoid allocation
+
 	/**
 	 * Adds a modifier for all playfields or a specific one.
 	 *
@@ -230,30 +236,27 @@ final class Manager extends FlxBasic {
 	override function update(elapsed:Float):Void {
 		super.update(elapsed);
 
-		__forEachPlayfield(pf -> pf.update(elapsed));
+		for (i in 0...playfieldCount)
+			playfields[i].update(elapsed);
 	}
 
 	/**
 	 * Draws all playfields, sorting them by z-order before drawing.
 	 */
 	override function draw():Void {
-		var total = 0;
-		__forEachPlayfield(pf -> {
-			pf.draw();
-			total += pf.drawCB.length;
-		});
+		for (i in 0...playfieldCount)
+			playfields[i].draw();
 
-		var drawQueue:Vector<Funny> = new Vector<Funny>(total);
+		drawQueue.resize(0);
 
-		var j = 0;
-		__forEachPlayfield(pf -> {
-			for (x in pf.drawCB)
-				drawQueue[j++] = x;
-		});
+		for (i in 0...playfieldCount) {
+			var pf = playfields[i];
+			var cb = pf.drawCB;
+			for (k in 0...cb.length)
+				drawQueue.push(cb[k]);
+		}
 
-		drawQueue.sort((a, b) -> {
-			return FlxSort.byValues(FlxSort.DESCENDING, a.z, b.z);
-		});
+		drawQueue.sort(sortFunny);
 
 		for (item in drawQueue)
 			item.callback();

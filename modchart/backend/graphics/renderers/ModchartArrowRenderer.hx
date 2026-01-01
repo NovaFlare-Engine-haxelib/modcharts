@@ -103,43 +103,15 @@ final class ModchartArrowRenderer extends ModchartRenderer<FlxSprite> {
 		var planeVertices = getGraphicVertices(planeWidth, planeHeight, arrow.flipX, arrow.flipY);
 		var projectionZ:haxe.ds.Vector<Float> = new haxe.ds.Vector(Math.ceil(planeVertices.length / 2));
 
-		var vertPointer = 0;
-		@:privateAccess do {
-			rotationVector.setTo(planeVertices[vertPointer], planeVertices[vertPointer + 1], 0);
-
-			// The result of the vert rotation
-			var rotation = ModchartUtil.rotate3DVector(rotationVector, output.visuals.angleX, output.visuals.angleY,
-				ModchartUtil.getFrameAngle(arrow) + output.visuals.angleZ + arrow.angle);
-
-			// apply skewness
-			if (output.visuals.skewX != 0 || output.visuals.skewY != 0) {
-				matrix.identity();
-
-				matrix.b = ModchartUtil.tan(output.visuals.skewY * FlxAngle.TO_RAD);
-				matrix.c = ModchartUtil.tan(output.visuals.skewX * FlxAngle.TO_RAD);
-
-				rotation.x = matrix.__transformX(rotation.x, rotation.y);
-				rotation.y = matrix.__transformY(rotation.x, rotation.y);
-			}
-			rotation.x = rotation.x * depthScale * output.visuals.scaleX;
-			rotation.y = rotation.y * depthScale * output.visuals.scaleY;
-
-			var view = new Vector3(rotation.x + arrowPosition.x, rotation.y + arrowPosition.y, rotation.z);
-			if (Config.CAMERA3D_ENABLED)
-				view = instance.camera3D.applyViewTo(view);
-			view.z *= 0.001 * Config.Z_SCALE;
-
-			// The result of the perspective projection of rotation
-			final projection = this.projection.transformVector(view);
-
-			planeVertices[vertPointer] = projection.x;
-			planeVertices[vertPointer + 1] = projection.y;
-
-			// stores depth from this vert to use it for perspective correction on uv's
-			projectionZ[Math.floor(vertPointer / 2)] = Math.max(0.0001, projection.z);
-
-			vertPointer = vertPointer + 2;
-		} while (vertPointer < planeVertices.length);
+		modchart.backend.math.ModchartSIMD.processArrow(
+			planeVertices, planeVertices, projectionZ,
+			output.visuals.angleX, output.visuals.angleY, ModchartUtil.getFrameAngle(arrow) + output.visuals.angleZ + arrow.angle,
+			output.visuals.skewX, output.visuals.skewY,
+			output.visuals.scaleX, output.visuals.scaleY,
+			arrowPosition.x, arrowPosition.y, arrowPosition.z,
+			projection,
+			instance.camera3D
+		);
 
         // @formatter:off
 		// this is confusing af

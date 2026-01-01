@@ -52,6 +52,10 @@ final class ModchartPerspective {
 	private var __depthScale:Float = 1;
 	private var __depthOffset:Float = 0;
 
+	public function get_tanHalfFov() return __tanHalfFov;
+	public function get_depthScale() return __depthScale;
+	public function get_depthOffset() return __depthOffset;
+
 	public function new() {
 		fov = Math.PI / 2;
 		updateProperties();
