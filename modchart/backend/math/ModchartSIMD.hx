@@ -102,15 +102,6 @@ class ModchartSIMD {
 		var v6 = vertices[6];
 		var v7 = vertices[7];
 
-		// We need to pass arrays/pointers, but for just 4 verts, scalar loop in C++ might be auto-vectorized
-		// OR we explicitly use SSE/NEON if we include headers.
-		// However, standard C++ compiler auto-vectorization is often good enough if we write clean loops.
-		// Let's try to write a clean unrolled loop in Haxe first?
-		// User specifically asked for "direct cpp code access" to fix the "Type not found" error.
-
-		// Let's use a C++ block to do the heavy lifting.
-		// We need to capture local vars.
-
 		untyped __cpp__("
 			float vX[4] = { (float){0}, (float){1}, (float){2}, (float){3} };
 			float vY[4] = { (float){4}, (float){5}, (float){6}, (float){7} };
