@@ -3,10 +3,12 @@ package modchart.backend.standalone.adapters.psych;
 #if (FM_ENGINE_VERSION == "1.0" || FM_ENGINE_VERSION == "0.7")
 import general.backend.ClientPrefs;
 import general.backend.Conductor;
+
 import games.objects.Note;
 import games.objects.NoteSplash;
 import games.objects.StrumNote as Strum;
 import games.PlayState;
+
 #else
 import ClientPrefs;
 import Conductor;
